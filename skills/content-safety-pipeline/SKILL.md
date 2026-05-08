@@ -1,0 +1,146 @@
+---
+name: content-safety-pipeline
+description: Use when reviewing Xiaohongshu copy through a fixed browser-based safety pipeline that must use site-provided detection and repair tools instead of freeform AI rewriting
+---
+
+# Content Safety Pipeline
+
+## Overview
+
+This skill orchestrates a fixed Xiaohongshu copy review pipeline.
+
+It does not rewrite copy freely. It routes the copy through two site tools:
+
+1. `RedBook-Fixer` for site-provided detection, replacement, and auto-fix
+2. `零克查词` for final review
+
+All browser work must be delegated to `web-access`.
+
+## When To Use
+
+Use this skill when:
+
+1. The user provides raw Xiaohongshu copy that still needs platform safety review.
+2. The review must follow a fixed browser pipeline instead of freeform AI editing.
+3. The result must be returned as structured JSON plus a short Chinese summary.
+
+Do not use this skill when:
+
+1. The user wants creative rewriting.
+2. The user wants a general-purpose moderation framework for many platforms.
+3. The required websites are unavailable and the user wants an offline fallback.
+
+## Required Composition
+
+This skill is orchestration-only.
+
+Before performing any web action:
+
+1. Load `web-access`.
+2. Follow `web-access` guidance for browser setup and execution.
+
+Before each site stage:
+
+1. Read `references/site-adapters/redbook-fixer.md` before using `RedBook-Fixer`.
+2. Read `references/site-adapters/lingkechaci.md` before using `零克查词`.
+
+## Workflow
+
+1. Receive the user's raw Xiaohongshu copy as `input_text`.
+2. Load `web-access` and use it for all website access and page interaction.
+3. Read `references/site-adapters/redbook-fixer.md`.
+4. Open `RedBook-Fixer`.
+5. Input `input_text` into the page.
+6. Trigger the site's own detection, replacement, and auto-fix behavior.
+7. Extract the fixed copy as `redbook_fixed_text`.
+8. If extraction fails, return `status=error` with `failure_reason=pipeline_error`.
+9. Read `references/site-adapters/lingkechaci.md`.
+10. Open `零克查词`.
+11. Submit `redbook_fixed_text` for final review.
+12. Extract the review result.
+13. If the site reports remaining risk, return `status=fail` with `failure_reason=manual_review_required`.
+14. If the site reports no risk, return `status=pass`.
+15. If page structure, submission, or extraction fails at any point, return `status=error` with `failure_reason=pipeline_error`.
+
+## Output Contract
+
+Always return:
+
+1. A machine-readable JSON object
+2. A short Chinese summary
+
+Use this JSON shape:
+
+```json
+{
+  "status": "pass | fail | error",
+  "failure_reason": "manual_review_required | pipeline_error | null",
+  "input_text": "原始文案",
+  "redbook_fixed_text": "RedBook-Fixer 修复后文案",
+  "lingke_review": {
+    "has_risk": true,
+    "risk_words": [],
+    "risk_level": "",
+    "raw_result": ""
+  },
+  "final_text": "可发布版本或待人工处理版本",
+  "advice": "结论与建议"
+}
+```
+
+Field rules:
+
+1. If `status=pass`, then `failure_reason=null` and `final_text` must equal `redbook_fixed_text`.
+2. If `status=fail`, then `failure_reason=manual_review_required`.
+3. If `status=error`, then `failure_reason=pipeline_error`.
+4. `advice` must be either `可发布` or `仍有风险词，建议人工处理`.
+
+## Status Model
+
+Track the pipeline through these states:
+
+1. `received`
+2. `fixing`
+3. `fixed`
+4. `reviewing`
+5. `passed`
+6. `failed`
+
+Map `failed` through:
+
+1. `manual_review_required`
+2. `pipeline_error`
+
+## Hard Constraints
+
+1. Do not freely rewrite the user's copy.
+2. Do not invent a repaired version if `RedBook-Fixer` fails.
+3. Do not loop back into `RedBook-Fixer` after a failing `零克查词` result.
+4. Do not guess at results when selectors, buttons, or output nodes cannot be verified.
+5. Use only `RedBook-Fixer` output as the candidate publishable text.
+6. Keep the final human summary short and factual.
+
+## Failure Handling
+
+Return `status=fail` when:
+
+1. `零克查词` explicitly indicates remaining risk.
+
+Return `status=error` when:
+
+1. A required page cannot be opened.
+2. A required page-ready signal is missing.
+3. Text cannot be entered reliably.
+4. A required action cannot be triggered.
+5. Output cannot be extracted reliably.
+6. The page structure appears to have changed and the adapter no longer matches.
+
+## Validation Notes
+
+This MVP is intentionally documentation-first.
+
+The next execution phase should validate both adapters live with:
+
+1. One sample that passes final review
+2. One sample that still fails final review
+3. One broken-path scenario to confirm `pipeline_error`
