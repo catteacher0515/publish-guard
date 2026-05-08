@@ -16,7 +16,7 @@ This MVP covers:
 4. Extracting the site-produced fixed copy.
 5. Opening `零克查词` through `web-access`.
 6. Submitting the fixed copy for final review.
-7. Returning a structured result plus a short Chinese summary.
+7. Returning copy-ready text first, followed by a short Chinese summary and a structured result appendix.
 
 This MVP does not cover:
 
@@ -94,8 +94,9 @@ The MVP state machine has six states:
 
 The skill must always return:
 
-1. A machine-readable JSON object
+1. A copy-ready primary output block
 2. A short Chinese summary
+3. A machine-readable JSON appendix
 
 The JSON contract for the MVP is:
 
@@ -125,6 +126,16 @@ Field rules:
 3. `status=error`
    `failure_reason` must equal `pipeline_error`.
 4. `advice` must be either `可发布` or `仍有风险词，建议人工处理`.
+
+Presentation rules:
+
+1. `status=pass`
+   The first visible output must be `final_text` only, so the user can copy it directly.
+2. `status=fail`
+   The first visible output should be `redbook_fixed_text`, followed by a short warning that manual handling is still required.
+3. `status=error`
+   The skill should prioritize the error explanation and keep JSON as appendix output.
+4. The JSON appendix must come after the user-facing copy block and summary.
 
 ## Hard Constraints
 

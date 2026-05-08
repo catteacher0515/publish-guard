@@ -22,7 +22,7 @@ Use this skill when:
 
 1. The user provides raw Xiaohongshu copy that still needs platform safety review.
 2. The review must follow a fixed browser pipeline instead of freeform AI editing.
-3. The result must be returned as structured JSON plus a short Chinese summary.
+3. The result must return copy-ready text first, with structured JSON kept as appendix output.
 
 Do not use this skill when:
 
@@ -66,8 +66,9 @@ Before each site stage:
 
 Always return:
 
-1. A machine-readable JSON object
+1. A copy-ready primary output block
 2. A short Chinese summary
+3. A machine-readable JSON appendix
 
 Use this JSON shape:
 
@@ -95,6 +96,14 @@ Field rules:
 3. If `status=error`, then `failure_reason=pipeline_error`.
 4. `advice` must be either `可发布` or `仍有风险词，建议人工处理`.
 
+Presentation rules:
+
+1. If `status=pass`, the first output block must contain only `final_text`, so the user can copy it directly.
+2. If `status=pass`, the second output block should be a short summary such as `可发布`.
+3. If `status=fail`, the first output block should contain `redbook_fixed_text` as the best available draft, followed by a short manual-review warning.
+4. If `status=error`, do not output a copy-ready draft block unless a verified `redbook_fixed_text` already exists and is clearly labeled as unapproved.
+5. The JSON object must appear after the human-facing output, not before it.
+
 ## Status Model
 
 Track the pipeline through these states:
@@ -119,6 +128,7 @@ Map `failed` through:
 4. Do not guess at results when selectors, buttons, or output nodes cannot be verified.
 5. Use only `RedBook-Fixer` output as the candidate publishable text.
 6. Keep the final human summary short and factual.
+7. Optimize the first visible output for direct copy and paste by the user.
 
 ## Failure Handling
 

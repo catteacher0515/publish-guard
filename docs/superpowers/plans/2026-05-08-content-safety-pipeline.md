@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Create an MVP personal skill that runs a fixed Xiaohongshu content safety pipeline through `RedBook-Fixer` and `零克查词`, returning JSON-first results plus a short Chinese summary.
+**Goal:** Create an MVP personal skill that runs a fixed Xiaohongshu content safety pipeline through `RedBook-Fixer` and `零克查词`, returning copy-ready text first plus a short Chinese summary and JSON appendix.
 
 **Architecture:** Keep orchestration in `SKILL.md` and move site-specific behavior into two adapter reference files. Do not add scripts in the MVP. The skill must compose with `web-access` rather than re-implement browser logic.
 
@@ -22,7 +22,7 @@ Write a design doc that fixes the approved MVP boundaries:
 
 1. Orchestration-only `SKILL.md`
 2. Two site adapter references
-3. JSON-first output
+3. Copy-first output
 4. No auto-loop when final review fails
 
 - [ ] **Step 2: Review the design document for missing scope**
@@ -89,7 +89,7 @@ Document the exact ordered flow:
 
 - [ ] **Step 4: Write the output contract**
 
-Include the exact JSON schema and the short Chinese summary requirement.
+Include the exact JSON schema, the copy-first presentation rule, and the short Chinese summary requirement.
 
 - [ ] **Step 5: Write hard constraints and failure rules**
 
