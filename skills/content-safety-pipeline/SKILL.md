@@ -1,6 +1,6 @@
 ---
 name: content-safety-pipeline
-description: Use when reviewing Xiaohongshu copy through a fixed browser-based safety pipeline that must use site-provided detection and repair tools instead of freeform AI rewriting
+description: Use when handling Xiaohongshu copy that needs sensitive-word screening, risk-word review, forbidden-word checking, pass-rate review, or final manual-safe output, especially when the user mentions 小红书文案, 敏感词, 风险词, 违禁词, 过审, 内容安全, 零克查词, RedBook-Fixer, or writing approved copy into a Xiaohongshu image-note draft
 ---
 
 # Content Safety Pipeline
@@ -26,6 +26,18 @@ Use this skill when:
 2. The review must follow a fixed browser pipeline instead of freeform AI editing.
 3. The result must return copy-ready text first, with structured JSON kept as appendix output.
 4. A passing result may need to be written into a Xiaohongshu image-note draft for later human review.
+
+Strong natural-language triggers include:
+
+1. `小红书文案敏感词筛查`
+2. `帮我过一遍小红书敏感词`
+3. `检查这段文案有没有风险词`
+4. `做一下内容安全审查`
+5. `用零克查词审一下`
+6. `用 RedBook-Fixer 处理一下`
+7. `过审之后灌进小红书草稿`
+8. `生成可直接复制的小红书过审文案`
+9. `如果没问题就写入小红书图文草稿`
 
 Do not use this skill when:
 
