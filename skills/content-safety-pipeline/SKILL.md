@@ -1,6 +1,6 @@
 ---
 name: content-safety-pipeline
-description: Use when handling Xiaohongshu copy that needs sensitive-word screening, risk-word review, forbidden-word checking, pass-rate review, or final manual-safe output, especially when the user mentions 小红书文案, 敏感词, 风险词, 违禁词, 过审, 内容安全, 零克查词, RedBook-Fixer, or writing approved copy into a Xiaohongshu image-note draft
+description: Use when handling 小红书文案, 小红书笔记, 图文笔记文案, or 发布前文案 that needs 敏感词筛查, 风险词检查, 违禁词检测, 过审处理, 限流规避, 内容安全审查, 零克查词复检, RedBook-Fixer 修复, 安全改写结果复核, or writing a passed version into 小红书图文草稿
 ---
 
 # Content Safety Pipeline
@@ -38,6 +38,12 @@ Strong natural-language triggers include:
 7. `过审之后灌进小红书草稿`
 8. `生成可直接复制的小红书过审文案`
 9. `如果没问题就写入小红书图文草稿`
+10. `发小红书前帮我检查一下`
+11. `这段笔记会不会被限流`
+12. `帮我处理一下小红书违禁词`
+13. `把这段文案过审一下`
+14. `先做敏感词修复，再做最终审查`
+15. `过审版文案给我，同时写进草稿箱`
 
 Do not use this skill when:
 
