@@ -11,6 +11,7 @@
 1. `RedBook-Fixer` 做初筛、替换、自动修复
 2. `零克查词` 做终审
 3. 终审 `pass` 后，把文案写入小红书图文草稿
+4. 每次执行后，将结果落盘到本地执行日志
 
 ## 让 Codex 可调用
 
@@ -71,3 +72,13 @@ Codex 的个人自定义 skills 目录是 `~/.agents/skills/`。
 1. 只做固定流程编排，不做自由改写
 2. 小红书草稿分支只写草稿，不自动发布
 3. MVP 固定上传图片为 `/Users/huapingyu/Myself/pingyu.jpg`
+
+## 执行日志
+
+每次运行 `content-safety-pipeline` 后，都应尝试把结果写入：
+
+```text
+logs/content-safety-pipeline/YYYY/MM/
+```
+
+日志写入失败不会覆盖已经得到的业务结论，但应在返回结果里明确标记。

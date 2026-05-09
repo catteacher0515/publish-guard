@@ -18,6 +18,7 @@ This MVP covers:
 6. Submitting the fixed copy for final review.
 7. Returning copy-ready text first, followed by a short Chinese summary and a structured result appendix.
 8. If final review passes, opening the Xiaohongshu image-note creator, uploading a fixed image, and writing the approved copy into the draft body.
+9. Writing one JSON execution log file for each run.
 
 This MVP does not cover:
 
@@ -80,11 +81,15 @@ This makes future site maintenance local instead of forcing main skill rewrites.
 17. Enter the image-note editor and write `final_text` into the body field.
 18. If the draft branch succeeds, return `draft_status=created`.
 19. If the draft branch fails, keep `status=pass` and return `draft_status=failed`.
-20. If the pipeline cannot complete before content safety reaches `pass`, return `status=error`.
+20. Build the final result object.
+21. Write one JSON execution log under `logs/content-safety-pipeline/YYYY/MM/`.
+22. If log writing succeeds, return `log_status=written`.
+23. If log writing fails, keep the business result and return `log_status=failed`.
+24. If the pipeline cannot complete before content safety reaches `pass`, return `status=error`.
 
 ## State Machine
 
-The MVP has two linked state machines.
+The MVP has three linked state machines.
 
 ### 1. Content Safety State Machine
 
@@ -110,6 +115,13 @@ The MVP has two linked state machines.
 6. `draft_failed`
 
 The draft state machine is allowed to start only after content safety reaches `passed`.
+
+### 3. Execution Logging State Machine
+
+1. `log_pending`
+2. `log_writing`
+3. `log_written`
+4. `log_failed`
 
 ## Output Contract
 
@@ -137,7 +149,10 @@ The JSON contract for the MVP is:
   "advice": "结论与建议",
   "draft_status": "created | failed | skipped",
   "draft_url": "",
-  "draft_note": ""
+  "draft_note": "",
+  "log_status": "written | failed",
+  "log_path": "",
+  "log_note": ""
 }
 ```
 
@@ -154,6 +169,10 @@ Field rules:
    `draft_url` should be recorded when available.
 6. `draft_status=failed`
    `draft_note` should briefly explain why the draft branch failed.
+7. `log_status=written`
+   `log_path` should record the saved file path.
+8. `log_status=failed`
+   `log_note` should briefly explain why the log file was not written.
 
 Presentation rules:
 
@@ -168,6 +187,7 @@ Presentation rules:
 5. `status=error`
    The skill should prioritize the error explanation and keep JSON as appendix output.
 6. The JSON appendix must come after the user-facing copy block and summary.
+7. The short summary may mention that the execution log was archived.
 
 ## Hard Constraints
 
@@ -179,13 +199,18 @@ Presentation rules:
 6. The Xiaohongshu draft branch must never auto-publish.
 7. The Xiaohongshu draft branch must use `/Users/huapingyu/Myself/pingyu.jpg` as the fixed image for this MVP.
 8. Even if drafting succeeds, the skill must still output the copy-ready text first for human review.
+9. Every run must attempt to write one JSON execution log file.
+10. A log-writing failure must not erase a verified business result.
 
 ## File Layout
 
 ```text
 content-safety-pipeline/
 ├── SKILL.md
+├── templates/
+│   └── execution-log-template.json
 └── references/
+    ├── execution-logging.md
     └── site-adapters/
         ├── redbook-fixer.md
         ├── lingkechaci.md

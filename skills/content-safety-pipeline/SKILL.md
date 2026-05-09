@@ -66,6 +66,11 @@ Before each site stage:
 2. Read `references/site-adapters/lingkechaci.md` before using `零克查词`.
 3. Read `references/site-adapters/xiaohongshu-image-draft.md` before using the Xiaohongshu draft branch.
 
+Before returning the final answer:
+
+1. Read `references/execution-logging.md`.
+2. Write one execution log file for the current run.
+
 ## Workflow
 
 1. Receive the user's raw Xiaohongshu copy as `input_text`.
@@ -86,7 +91,12 @@ Before each site stage:
 16. In the draft branch, upload `/Users/huapingyu/Myself/pingyu.jpg`, enter the image-note editor, and write `final_text` into the body field.
 17. If the draft branch succeeds, return `draft_status=created`.
 18. If the draft branch fails, keep `status=pass`, return `draft_status=failed`, and capture the reason in `draft_note`.
-19. If page structure, submission, or extraction fails before content safety reaches `pass`, return `status=error` with `failure_reason=pipeline_error` and `draft_status=skipped`.
+19. Assemble the final structured result object.
+20. Read `references/execution-logging.md`.
+21. Write one JSON execution log under the repository `logs/content-safety-pipeline/YYYY/MM/` path.
+22. If log writing succeeds, set `log_status=written` and record `log_path`.
+23. If log writing fails, keep the business result unchanged, set `log_status=failed`, and explain the reason briefly in `log_note`.
+24. If page structure, submission, or extraction fails before content safety reaches `pass`, return `status=error` with `failure_reason=pipeline_error` and `draft_status=skipped`.
 
 ## Output Contract
 
@@ -114,7 +124,10 @@ Use this JSON shape:
   "advice": "结论与建议",
   "draft_status": "created | failed | skipped",
   "draft_url": "",
-  "draft_note": ""
+  "draft_note": "",
+  "log_status": "written | failed",
+  "log_path": "",
+  "log_note": ""
 }
 ```
 
@@ -126,6 +139,9 @@ Field rules:
 4. `advice` must be either `可发布`, `可发布，但写入小红书草稿失败`, or `仍有风险词，建议人工处理`.
 5. If `draft_status=created`, `draft_url` should be recorded when available.
 6. If `draft_status=failed`, `draft_note` must explain the failure briefly.
+7. `log_status` must not change the business result of `pass`, `fail`, or `error`.
+8. If `log_status=written`, `log_path` must contain the saved JSON file path.
+9. If `log_status=failed`, `log_note` must explain why the file was not written.
 
 Presentation rules:
 
@@ -135,6 +151,7 @@ Presentation rules:
 4. If `status=fail`, the first output block should contain `redbook_fixed_text` as the best available draft, followed by a short manual-review warning.
 5. If `status=error`, do not output a copy-ready draft block unless a verified `redbook_fixed_text` already exists and is clearly labeled as unapproved.
 6. The JSON object must appear after the human-facing output, not before it.
+7. The short Chinese summary may append `执行日志已归档` when `log_status=written`.
 
 ## Status Model
 
@@ -161,6 +178,13 @@ Track the draft branch through these states:
 5. `draft_created`
 6. `draft_failed`
 
+Track the logging branch through these states:
+
+1. `log_pending`
+2. `log_writing`
+3. `log_written`
+4. `log_failed`
+
 ## Hard Constraints
 
 1. Do not freely rewrite the user's copy.
@@ -174,6 +198,8 @@ Track the draft branch through these states:
 9. The Xiaohongshu draft branch must never auto-publish.
 10. The draft branch must use `/Users/huapingyu/Myself/pingyu.jpg` as the fixed image for this MVP.
 11. Even if the draft branch succeeds, still output the copy-ready text first for human review.
+12. Every run must attempt to write an execution log file before returning the final answer.
+13. A log-writing failure must not overwrite a verified `pass`, `fail`, or `error` business result.
 
 ## Failure Handling
 
@@ -197,6 +223,12 @@ Return `draft_status=failed` when:
 3. The editor page does not become writable after image upload.
 4. The body field cannot be found or written.
 5. The draft page structure appears to have changed after content safety already passed.
+
+Return `log_status=failed` when:
+
+1. The repository log directory cannot be found or created.
+2. The JSON log file cannot be written reliably.
+3. The final result object cannot be serialized safely.
 
 ## Validation Notes
 

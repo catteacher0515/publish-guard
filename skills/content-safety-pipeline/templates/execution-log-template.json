@@ -1,0 +1,22 @@
+{
+  "logged_at": "2026-05-09T12:30:45+08:00",
+  "skill_name": "content-safety-pipeline",
+  "status": "pass",
+  "failure_reason": null,
+  "input_text": "原始文案",
+  "redbook_fixed_text": "RedBook-Fixer 修复后文案",
+  "lingke_review": {
+    "has_risk": false,
+    "risk_words": [],
+    "risk_level": "",
+    "raw_result": "全文：582 字|违禁词：0 字 |敏感词：0 字"
+  },
+  "final_text": "可发布版本",
+  "advice": "可发布",
+  "draft_status": "created",
+  "draft_url": "https://creator.xiaohongshu.com/publish/publish?source=official&from=tab_switch&target=image",
+  "draft_note": "",
+  "log_status": "written",
+  "log_path": "logs/content-safety-pipeline/2026/05/2026-05-09T12-30-45-pass.json",
+  "log_note": ""
+}

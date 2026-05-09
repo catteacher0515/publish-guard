@@ -1,0 +1,2 @@
+logs/content-safety-pipeline/*
+!logs/content-safety-pipeline/README.md
